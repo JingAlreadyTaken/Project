@@ -100,9 +100,48 @@ class BasicPasswordManagement
 		
 		return $h;
 	}
+
+
+
+	/**
+	 * Returns the Edit distance between two Function
+	 * @param string $string1 String one which contains the old password 
+	 * @param int    $length1 length of the old password
+	 * @param string $string2 String two which contains the new password 
+	 * @param int    $length2 length of the new password
+	 * @return int Returns the edit distance between the two strings 
+	*/
+
+	public static function getPasswordDistance($string1,$length1,$string2,$length2)
+	{
+		if($length1 === 0) return $length2;
+		if($length2 === 0) return $length1;
+
+		if($string1[$length1 -1] === $string2[$length2-1])
+			$cost = 0;
+		else
+			$cost = 1;
+		return min(self::getPasswordDistance($string1,$length1 -1,$string2,$length2   )+1,
+				   self::getPasswordDistance($string1,$length1,   $string2,$length2 -1)+1,
+				   self::getPasswordDistance($string1,$length1 -1,$string2,$length2 -1)+$cost);
+
+	}
 	
-	
-	
+	/**
+	 * Returns the Edit distance between two Function
+	 * @param string $string1 String one which contains the old password 
+	 * @param string $string2 String two which contains the new password 
+	 * @return int Returns the percentage change between the old password and the new password
+	*/
+
+	public static function checkPasswordRepetition($string1,$string2)
+	{
+
+
+	$pass_dist =self::getPasswordDistance($string1,strlen($string1),$string2,strlen($string2));
+	echo $pass_dist.";";
+	return(round(($pass_dist/strlen($string1))*100));
+	}
 	/**
 	 * To check if the string has ordered characters i.e. characters in strings are consecutive - such as "abcd". Also checks for reverse patterns such as "dcba".
 	 * @param string $string	String in which we have to check for presence of ordered characters
@@ -141,8 +180,7 @@ class BasicPasswordManagement
 		$i = 0;
 		$j = strlen($string);
 		
-		//group all the characters into length 1, and calculate their positions. 
-		//If the positions match with the value $keyboardSet, then they contain keyboard ordered characters.
+		//group all the characters into length 1, and calculate their positions. If the positions match with the value $keyboardSet, then they contain keyboard ordered characters.
 		$str = implode('', array_map(function($m) use (&$i, &$j)
 		{
 			$keyboardSet="1234567890qwertyuiopasdfghjklzxcvbnm";
@@ -154,25 +192,6 @@ class BasicPasswordManagement
 	
 	
 	
-	public static function hasReversedKeyboardOrderedCharacters($string,$length)
-	{
-		$length = (int)$length;
-
-		$i = 0;
-		$j = strlen($string);
-
-		//group all the characters into length 1, and calculate their positions. 
-		//If the positions match with the value $keyboardSet, then they contain keyboard ordered characters.
-		$str = implode('', array_map(function($m) use (&$i, &$j)
-		{
-			$keyboardSet="mnbvcxzlkjhgfdsapoiuytrewq0987654321";
-			return ((strpos($keyboardSet,$m[0]) + $j--) ) . ((strpos($keyboardSet,$m[0]) + $i++) );
-		}, str_split($string, 1)));
-		
-		return \preg_match('#(..)(..\1){' . ($length - 1) . '}#', $str) == true;
-	}
-
-
 	/**
 	 * To check if the string is a phone-number.
 	 * @param string $string	The string to be checked
