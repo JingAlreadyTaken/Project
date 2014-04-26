@@ -4,7 +4,7 @@ class Form extends CI_Controller {
 
 	function index()
 	{
-		$this->load->helper(array('form', 'url'));
+		//$this->load->helper(array('form', 'url'));
 
 		$this->load->library('form_validation');
 
@@ -22,7 +22,7 @@ class Form extends CI_Controller {
 			$form=$this->input->post();
 			if($form)
 			{
-			$entropy=$this->basicpasswordmanagement->entropy($form["password"]);
+			/*$entropy=$this->basicpasswordmanagement->entropy($form["password"]);
 			echo $entropy.'   :   ';
 			if($this->basicpasswordmanagement->hasorderedcharacters($form["password"],strlen($form["password"])/2)==true)
 				echo "success ordered characters"."<br>";
@@ -37,7 +37,10 @@ class Form extends CI_Controller {
 			if($this->basicpasswordmanagement->containsString($form["password"],$form["passconf"]) == true)
 				echo "I failed!!!!";
 			else
+			
 				echo "Yeeee!!!!!";
+			*/
+			echo $this->basicpasswordmanagement->checkPasswordRepetition($form["oldpassword"],$form["newpassword"]);
 			//echo($this->basicpasswordmanagement->strength($form["password"]).':::');
 			}
 				$this->load->view('form');
