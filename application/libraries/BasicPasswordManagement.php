@@ -137,11 +137,46 @@ class BasicPasswordManagement
 	public static function checkPasswordRepetition($string1,$string2)
 	{
 
-
 	$pass_dist =self::getPasswordDistance($string1,strlen($string1),$string2,strlen($string2));
-	echo $pass_dist.";";
 	return(round(($pass_dist/strlen($string1))*100));
 	}
+
+	/**
+	 * Returns the percentage of dictinary match for the given string
+	 * @param string $string Contains the password to be checked
+	 * @return int returns the percentage of password which is dictionary
+	 *
+	*/
+	public static function checkIfDictionaryPassword($string)
+	{		$ci = & get_instance();
+			$ci->load->database();
+			$ci->db->select('word');
+			$ci->db->from('words');
+			$ci->db->where('word',$string);
+			$query=$ci->db->get();
+			if(count($query->result()) > 0)
+			return true;
+			else
+			{
+				$len=strlen($string);
+				for($j=3;$j<strlen($string);$j++)
+				{	
+					for($i=0;$i<=($len-$j);$i++)
+					{
+						$ci->db->select('word');
+						$ci->db->from('words');
+						$ci->db->where('word',substr($string,$i,$j));
+						$query=$ci->db->get();
+						if(count($query->result()) > 0)
+						return true;
+						
+					}
+				}
+			return false;
+			}
+			
+	}
+
 	/**
 	 * To check if the string has ordered characters i.e. characters in strings are consecutive - such as "abcd". Also checks for reverse patterns such as "dcba".
 	 * @param string $string	String in which we have to check for presence of ordered characters
