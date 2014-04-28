@@ -14,34 +14,57 @@ class Form extends CI_Controller {
 			$form=$this->input->post();
 			if($form)
 			{
+				$changePasswordResult = 0;
 
 			$diffValue = $this->basicpasswordmanagement->getPasswordDistance($form["oldpassword"],strlen($form["oldpassword"]),$form["newpassword"],strlen($form["newpassword"]));
-			echo $diffValue;
+			//echo $diffValue;
 				
 			$entropy=$this->basicpasswordmanagement->entropy($form["newpassword"]);
-			echo $entropy.'   :   ';
+			//echo $entropy.'   :   ';
 			if($this->basicpasswordmanagement->hasorderedcharacters($form["newpassword"],strlen($form["newpassword"])/2)==true)
-				echo "success ordered characters"."<br>";
+				{
+					//echo "success ordered characters"."<br>";
+				}
 			else
-				echo "failure ordered characters"."<br>";
+			{
+				//echo "failure ordered characters"."<br>";
+				$changePasswordResult = "failure ordered characters";
+			}
+				
 
 			if($this->basicpasswordmanagement->hasKeyboardOrderedCharacters($form["newpassword"],strlen($form["newpassword"]))==true)
-				echo "success keyboard ordered characters"."<br>";
+			{
+				//echo "success keyboard ordered characters"."<br>";
+			}
 			else
-				echo "failure keyboard ordered characters"."<br>";
+			{
+				//echo "failure keyboard ordered characters"."<br>";
+				$changePasswordResult = $changePasswordResult + "failure keyboard ordered characters";
+			}
+				
 
 			if($this->basicpasswordmanagement->containsString($form["newpassword"],$form["confpassword"]) == true)
-				echo "I failed!!!!";
-			else
-			
-				echo "Yeeee!!!!!";
-			
-			echo $this->basicpasswordmanagement->checkPasswordRepetition($form["oldpassword"],$form["newpassword"]);
-			//echo($this->basicpasswordmanagement->strength($form["password"]).':::');
+			{
+				//echo "I failed!!!!";
+				$changePasswordResult = $changePasswordResult + "failure keyboard ordered characters";
 			}
-				$this->load->view('form');
 			
-			
+			//echo $this->basicpasswordmanagement->checkPasswordRepetition($form["oldpassword"],$form["newpassword"]);
+			//echo($this->basicpasswordmanagement->strength($form["newpassword"]).':::');
+
+				$this->load->view('result');
+				if($changePasswordResult == 0)
+				{
+
+				}
+				else
+				{
+					echo $changePasswordResult;
+				}
+
+			}
+			else
+				$this->load->view('form');			
 	}
 }
 ?>
