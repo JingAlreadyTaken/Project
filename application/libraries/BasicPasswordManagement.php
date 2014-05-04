@@ -101,10 +101,10 @@ class BasicPasswordManagement
 		return $h;
 	}
 
-
+    
 
 	/**
-	 * Returns the Edit distance between two Function
+	 * Returns the Edit distance between two Function based on Levenshtein distance function from wikepedia
 	 * @param string $string1 String one which contains the old password 
 	 * @param int    $length1 length of the old password
 	 * @param string $string2 String two which contains the new password 
@@ -128,6 +128,7 @@ class BasicPasswordManagement
 	}
 	
 	/**
+	 * ISA681-term project
 	 * Returns the Edit distance between two Function
 	 * @param string $string1 String one which contains the old password 
 	 * @param string $string2 String two which contains the new password 
@@ -142,19 +143,20 @@ class BasicPasswordManagement
 	}
 
 	/**
+	 * ISA681-term project
 	 * Returns the percentage of dictinary match for the given string
+	 * Here the DICT is the table holding the dictionary words
+	 * WORD is the column name for the words, we are checking for a minimum length of 3 incrementing
 	 * @param string $string Contains the password to be checked
 	 * @return int returns the percentage of password which is dictionary
 	 *
 	*/
 	public static function checkIfDictionaryPassword($string)
-	{		$ci = & get_instance();
-			$ci->load->database();
-			$ci->db->select('word');
-			$ci->db->from('words');
-			$ci->db->where('word',$string);
-			$query=$ci->db->get();
-			if(count($query->result()) > 0)
+	{		
+
+		$result = SQL("SELECT WORD FROM DICT WHERE WORD = ?", array($string));
+		
+			if(count($result) > 0)
 			return true;
 			else
 			{
@@ -163,11 +165,9 @@ class BasicPasswordManagement
 				{	
 					for($i=0;$i<=($len-$j);$i++)
 					{
-						$ci->db->select('word');
-						$ci->db->from('words');
-						$ci->db->where('word',substr($string,$i,$j));
-						$query=$ci->db->get();
-						if(count($query->result()) > 0)
+						
+			$result = SQL("SELECT WORD FROM DICT WHERE WORD = ?", array(substr($string,$i,$j)));
+					if(count($result) > 0)
 						return true;
 						
 					}
@@ -178,6 +178,7 @@ class BasicPasswordManagement
 	}
 
 	/**
+	 * ISA
 	 * To check if the string has ordered characters i.e. characters in strings are consecutive - such as "abcd". Also checks for reverse patterns such as "dcba".
 	 * @param string $string	String in which we have to check for presence of ordered characters
 	 * @param int $length		Minimum length of pattern to be qualified as ordered. e.g. String "abc" is not ordered if the length is 4 because it takes a minimum of 4 characters in consecutive orders to mark the string as ordered. Thus, the string "abcd" is an ordered character of length 4. Similarly "xyz" is ordered character of length 3 and "uvwxyz" is ordered character of length 6
@@ -201,7 +202,7 @@ class BasicPasswordManagement
 	}
 	
 	
-	
+
 	/**
 	 * To check if the string has keyboard ordered characters i.e. strings such as "qwert". Also checks for reverse patterns such as "rewq".
 	 * @param string $string	String in which we have to check for presence of ordered characters
@@ -224,9 +225,84 @@ class BasicPasswordManagement
 		
 		return \preg_match('#(..)(..\1){' . ($length - 1) . '}#', $str) == true;
 	}
+
+	/**
+	*ISA681-term project 
+	* Although this exists in the strength, we thought having this would help developers who 
+	* want to enforce the passport policy based on number of special characters
+	*To check if has no special characters 
+	*@param string $string password that the user enters
+	*@return int $count the number of special characters
+	*
+	**/
+	public static function hasSpecialCharacters($string)
+	{
+		
+		$count =0;
+		array_map(function($m) use(&$count) 			
+			{
+				$special_chars=array('~','`','!','@','#','$','%','^','&','*','(',')','-','_','+','=','[','{',']',
+					'}','\\','|','"','\'',';',':',',','<','>','.','/','?');
+				array_map(function($s) use(&$m,&$count)
+				{
+
+					if ($s===$m)
+						$count++;
+				}
+
+					,$special_chars);
+			}
+			,str_split($string,1));
+			return $count;
+			}
+	/** 
+	*ISA681-term project 
+	*To check if password contains repeating characters(exampe: aaaa bbbb,111 222) or number returns based on the given length
+	* A minimum Length of 2 is recommended 
+	*@param string $string The string to be checked
+	*@param int    $length up to which it has to be compared
+	*@return Boolean if the string has sequenced numbers or returns Fals
+	**/
+
+	public static function hasRepeatingCharacters($string,$length)
+	{
+
+	for($i=0;$i<strlen($string);$i++)
+		{
+			preg_match("/^[A-Z]|[a-z]|[0-9]$/",substr($string,$i,1),$match);
+			if(count($match) > 0)
+			{
+			$pattern='/'.substr($string,$i,1).'{'.$length.'}'.'/';
+			preg_match($pattern,$string,$matches);
+			if (count($matches)>0)
+			return TRUE;
+			}
+		}
+		return FALSE;
+	}
 	
-	
-	
+    /**	
+     * ISA681-term project
+     *To check the count of the numbers in the provided string 
+     *@param string $string the actual password that is to be verified 
+     *@return int $count returns the count of the numbers in the provided string
+     *
+    **/ 
+	public static function hasNumbers($string)
+	{
+	$count =0;
+    $pattern="/[0-9]/";
+    array_map(function($m) use(&$count,&$pattern)
+    {
+
+     preg_match($pattern, $m, $matches);
+     if(count($matches)>0)
+     	$count++;
+    },str_split($string,1)
+	);
+    return $count;
+
+	}
 	/**
 	 * To check if the string is a phone-number.
 	 * @param string $string	The string to be checked
