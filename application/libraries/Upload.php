@@ -2,10 +2,10 @@
 if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
 /**
- * This library will help in providing secure file uploads, the functions we have provided are based
- * on the vulnerabilites on file uploads in PHP and solutions provided 
+ * Required Files
  */
-
+require_once (__DIR__ . '/core/random.php');
+require_once (__DIR__ . '/core/time.php');
 
 
 
@@ -13,25 +13,36 @@ class Upload
 {
 	
  	/**
-	 * Maximum allowed file size for file upload in bytes
+	 * Maximum allowed file size for file upload.
 	 * @var int
  	*/
 	public static $maximumSize = 2097152;
 	
 	/**
-	 * Allowed extensions
+	 * Allowed extensions 
 	 * @var array
 	**/
 	public static $allowedExtensions= array("jpeg"=>"jpeg","gif"=>"gif","pdf"=>"pdf","jpg"=>"jpg",
 											"png"=>"png","txt"=>"txt");
 
+	/**
+	 * Allowed mimetypes 
+	 * @var array
+	**/
+	public static $allowedMIMETypes= array("text/plain"=>"text/plain",
+											"application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+											=>"application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+											"image/jpeg"=>"image/jpeg","image/gif"=>"image/gif",
+											"application/x-tar"=>"application/x-tar",
+											"application/pdf"=>"application/pdf",
+											"image/x-ms-bmp"=>"image/bmp",
+											"application/pdf"=>"application/pdf");
+
 
 	/**
-	 *ISA681-term project
 	 *Receives the file name and tests if its allowed and valid, only allows the filename to contain 
-	 * does not allow spaces,anyother metacharacters excepts "-","_" with alphanumeric characters
 	 *@param string $string contains the file name to be tested
-	 *@return boolean true if file name is valid 
+	 *@return boolean true if file name is valid
 	 *
 	**/
 	public static function isValidName($field)
@@ -53,7 +64,6 @@ class Upload
 	}
 
 	/**
-	 *ISA681-term project
 	 * Receives the file name and checks for the file size , if the size is within the allowed limit 
 	 * returns true
 	 * @param string $field filename identifier
@@ -74,10 +84,7 @@ class Upload
 	 }
 
 	 /**
-	  *ISA681-term project
 	  * Receives the file name and checks if the provided extensions is part of allowed extensions
-	  * this is just direct stripping of the extension provided and comparing with allowed extensions
-	  * should be combined with isFileTypeReal to check if the type provided and actual type are same
 	  * @param string $field file identifier
 	  * @return boolean true is allowed extension, false if not
 	  **/
@@ -98,18 +105,16 @@ class Upload
 		 else
 	 		{
 		
-	 			if (Upload::$allowedExtensions[$matches[2]]===$matches[2])
-	 				return TRUE;
-	 			else
+	 			if (!(array_key_exists($matches[2],Upload::$allowedExtensions)))
 	 				return FALSE;
+	 			else
+	 				return TRUE;
 			}
 	 		}
 	 }
 
 	 /**
-	  * ISA681-term project
 	  * Check if the provided file is just image
-	  * Checks if the file provided is just an image or diguised as image, use only for image file
 	  * @param string $field file identifer 
 	  * @return boolean returns true if file is identified to be image else returns false
 	  **/
@@ -159,7 +164,6 @@ class Upload
 
 
 	/**
-	 * ISA681-term project
 	 *Checks if the file type is allowed based on MimeType 
 	 *@param string $field the identifier for the file 
 	 *@return boolean if the file type is not allowed return false
@@ -169,11 +173,18 @@ class Upload
 		$finfo=new finfo(FILEINFO_MIME_TYPE);
 		$file_contents=file_get_contents($_FILES[$field]['tmp_name']);
 		$mime_type=$finfo->buffer($file_contents);
-		if($mime_type === $_FILES[$field]['type'])
-			return TRUE;
-		else
-			return FALSE;
-	}
+		if (array_key_exists($mime_type,Upload::$allowedMIMETypes))
+		{
+
+			if(upload::$allowedMIMETypes[$mime_type] === $_FILES[$field]['type'])
+				return TRUE;
+			else
+				return FALSE;
+
+		}
+	 	else
+	 		return FALSE;
+			}
 }
 
 
